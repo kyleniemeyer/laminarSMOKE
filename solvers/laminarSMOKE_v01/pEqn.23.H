@@ -102,7 +102,8 @@ fvOptions.correct(U);
 K = 0.5*magSqr(U);
 
 // TOCHECK
-//if (thermo.dpdt())
+if (includeDpDt == true)
 {
-    dpdt = fvc::ddt(p);
+    //dpdt = fvc::ddt(p);
+    dpdt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 }

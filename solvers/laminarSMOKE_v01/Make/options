@@ -1,4 +1,5 @@
 EXE_INC = \
+    $(OPENFOAM_VERSION) \
     -w \
     $(MKL_SUPPORT) \
     $(EXTERNAL_ODE_SOLVERS) \
@@ -7,6 +8,7 @@ EXE_INC = \
     -I$(EIGEN_LIBRARY_PATH) \
     -I$(RAPIDXML_LIBRARY_PATH) \
     -I$(SUNDIALS_PATH)/include \
+    -I$(MKL_INCLUDE) \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/fvOptions/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \

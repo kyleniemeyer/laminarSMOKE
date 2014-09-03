@@ -60,12 +60,13 @@ Switch energyEquation;
 Switch homogeneousReactions;
 Switch iMassDiffusionInEnergyEquation;
 Switch constPressureBatchReactor;
+Switch includeDpDt;
 Eigen::VectorXd LewisNumbers;
 const dictionary& physicalModelDictionary = solverOptions.subDict("PhysicalModel");
 {
 	energyEquation = Switch(physicalModelDictionary.lookup(word("energyEquation")));
 	homogeneousReactions = Switch(physicalModelDictionary.lookup(word("homogeneousReactions")));
-	
+	includeDpDt = Switch(physicalModelDictionary.lookup(word("includeDpDt")));
 	iMassDiffusionInEnergyEquation = Switch(physicalModelDictionary.lookup(word("massDiffusionInEnergyEquation")));
 
 	// Diffusivity 

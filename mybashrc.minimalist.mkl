@@ -9,14 +9,14 @@ export OPENSMOKE_LIBRARY_PATH=$HOME/Development/MyCodes/OpenSMOKEpp/source
 
 
 #Options
-export MKL_SUPPORT=
+export MKL_SUPPORT='-DOPENSMOKE_USE_MKL=1'
 export EXTERNAL_ODE_SOLVERS=
 
 
 #Only if the OPENSMOKE_USE_MKL is turned on
-export MKL_PATH=
-export MKL_INCLUDE=
-export MKL_LIBS=
+export MKL_PATH=$HOME/intel/mkl
+export MKL_INCLUDE='$(MKL_PATH)/include'
+export MKL_LIBS='-Wl,--start-group $(MKL_PATH)/lib/intel64/libmkl_intel_lp64.a $(MKL_PATH)/lib/intel64/libmkl_core.a $(MKL_PATH)/lib/intel64/libmkl_sequential.a -Wl,--end-group -lpthread -lm'
 
 
 #Optional external ODE solvers

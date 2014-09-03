@@ -17,7 +17,7 @@ FoamFile
 
 Kinetics
 {
-	folder	   		"kinetics-GLOBAL";
+	folder	   		"kinetics-POLIMI";
 	inertSpecies 		N2;
 }
 
@@ -30,8 +30,9 @@ PhysicalModel
 
 	massDiffusionInEnergyEquation	on;
 	diffusivityCorrection		"semi-implicit";
-
 	diffusivityModel		"multi-component";
+
+	includeDpDt			off;
 }
 
 OdeHomogeneous
