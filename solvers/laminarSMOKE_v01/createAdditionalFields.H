@@ -1,0 +1,43 @@
+//- Creating field rho [kg/m3]
+Info<< "Creating field rho\n" << endl;
+volScalarField rho
+(
+    IOobject
+    (
+        "rho",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+	Rho(p,psi)
+);
+
+#include "compressibleCreatePhi.H"
+
+Info<< "Creating field dpdt\n" << endl;
+volScalarField dpdt
+(
+	IOobject
+	(
+		"dpdt",
+		runTime.timeName(),
+		mesh
+	),
+	mesh,
+	dimensionedScalar("dpdt", p.dimensions()/dimTime, 0)
+);
+
+// Kinetic energy
+Info<< "Creating field kinetic energy K\n" << endl;
+volScalarField K("K", 0.5*magSqr(U));
+
+// Interpolation scheme
+multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
+forAll(Y, i)
+{
+	fields.add(Y[i]);
+}
+
+// Spark
+spark.Setup(mesh);
