@@ -104,6 +104,6 @@ K = 0.5*magSqr(U);
 if (includeDpDt == true)
 {
     //dpdt = fvc::ddt(p);
-    dpdt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+    DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 }
 

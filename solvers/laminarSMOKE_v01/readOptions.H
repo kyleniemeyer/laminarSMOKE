@@ -11,7 +11,6 @@ IOdictionary solverOptions
 	)
 );
 
-Foam::string kinetics_folder;
 label inertIndex;
 OpenSMOKE::ThermodynamicsMap_CHEMKIN<double>*			thermodynamicsMapXML; 
 OpenSMOKE::KineticsMap_CHEMKIN<double>* 				kineticsMapXML;
@@ -20,7 +19,7 @@ OpenSMOKE::TransportPropertiesMap_CHEMKIN<double>* 		transportMapXML;
 const dictionary& kineticsDictionary = solverOptions.subDict("Kinetics");
 {
 	//- Kinetics folder
-	kinetics_folder = kineticsDictionary.lookup("folder");
+	Foam::string kinetics_folder = kineticsDictionary.lookup("folder");
 
 	// Reading homogeneous data
 	Info<< " * loading homogeneous kinetics...\n" << endl;
@@ -176,13 +175,8 @@ OpenSMOKE::ODE_Parameters odeParameterBatchReactorHomogeneous;
 }
 
 
-
-
-
-// Type
+// Check type
 {
-	
-	
 	if (odeParameterBatchReactorHomogeneous.type() == OpenSMOKE::ODE_Parameters::ODE_INTEGRATOR_DVODE)
 	{
 		#if OPENSMOKE_USE_DVODE != 1
