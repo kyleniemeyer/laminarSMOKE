@@ -151,8 +151,37 @@ volScalarField Q
     ),
     mesh,
     dimensionedScalar("thermo::Q", dimensionSet(1, -1, -3, 0, 0), 0.0)
+); 
+ 
+Info<< "Creating VT\n" << endl;
+volVectorField VT
+(
+    IOobject
+    (
+        "VT",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedVector("thermo::VT", dimensionSet(0, 1, -1, 0, 0), vector(0., 0., 0.) )
 );
 
+Info<< "Creating rhoVT\n" << endl;
+volVectorField rhoVT
+(
+    IOobject
+    (
+        "rhoVT",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedVector("thermo::rhoVT", dimensionSet(1, -2, -1, 0, 0), vector(0., 0., 0.) )
+);
 
 //- Allocating memory for mean specific heat [J/kg/K]
 Info<< "Creating field Cp\n" << endl;

@@ -3,6 +3,7 @@
 
 	OpenSMOKE::OpenSMOKEVectorDouble CpVector(thermodynamicsMapXML->NumberOfSpecies());
 	OpenSMOKE::OpenSMOKEVectorDouble Dmixvector(thermodynamicsMapXML->NumberOfSpecies());
+	OpenSMOKE::OpenSMOKEVectorDouble tetamixvector(thermodynamicsMapXML->NumberOfSpecies());
 
 	// Internal fields
 	{
@@ -68,7 +69,11 @@
 				const double coefficient = lambdaCells[celli]/(pCells[celli]*psiCells[celli])/cpCells[celli];
 				for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 					Dmix[i].internalField()[celli] = coefficient/LewisNumbers(i);
-			}			
+			}
+
+			// Thermal diffusion coefficients [-]
+			if (soretEffect == true)
+				transportMapXML->ThermalDiffusionRatios(tetamixvector, moleFractions);			
 		}
     }
 
@@ -138,6 +143,10 @@
 				for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 					Dmix[i].boundaryField()[patchi][facei] = coefficient/LewisNumbers(i);
 			}
+
+			// Thermal diffusion coefficients [-]
+			if (soretEffect == true)
+				transportMapXML->ThermalDiffusionRatios(tetamixvector, moleFractions);
 		}
 	}
 }

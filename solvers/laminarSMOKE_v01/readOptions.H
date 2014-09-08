@@ -60,6 +60,7 @@ Switch homogeneousReactions;
 Switch iMassDiffusionInEnergyEquation;
 Switch constPressureBatchReactor;
 Switch includeDpDt;
+Switch soretEffect;
 Eigen::VectorXd LewisNumbers;
 const dictionary& physicalModelDictionary = solverOptions.subDict("PhysicalModel");
 {
@@ -67,6 +68,7 @@ const dictionary& physicalModelDictionary = solverOptions.subDict("PhysicalModel
 	homogeneousReactions = Switch(physicalModelDictionary.lookup(word("homogeneousReactions")));
 	includeDpDt = Switch(physicalModelDictionary.lookup(word("includeDpDt")));
 	iMassDiffusionInEnergyEquation = Switch(physicalModelDictionary.lookup(word("massDiffusionInEnergyEquation")));
+	soretEffect = Switch(physicalModelDictionary.lookup(word("soretEffect")));
 
 	// Diffusivity 
 	{
@@ -155,6 +157,41 @@ const dictionary& outputDictionary = solverOptions.subDict("Output");
 		}
 	}
 }
+
+// Thermophoretic effect
+Switch thermophoreticEffect;
+std::vector<bool> thermophoreticEffectList;
+const dictionary& thermophoreticEffectDictionary = solverOptions.subDict("ThermophoreticEffect");
+{ 
+	thermophoreticEffect = Switch(thermophoreticEffectDictionary.lookup(word("thermophoreticEffect")));
+	word tag = thermophoreticEffectDictionary.lookup(word("thermophoreticEffectTag"));
+	 
+	thermophoreticEffectList.resize(thermodynamicsMapXML->NumberOfSpecies());
+	for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
+		thermophoreticEffectList[i] = false;
+
+	// Populate the list of thermophoretic species
+	if (thermophoreticEffect == true)
+	{
+		unsigned int count = 0;
+		for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
+		{
+			std::string name = thermodynamicsMapXML->NamesOfSpecies()[i];
+			std::string prefix = name.substr(0,tag.size());
+			if (prefix == tag)
+			{
+				thermophoreticEffectList[i] = true;
+				count++;
+			}
+		}
+			
+		if (count == 0)
+			std::cout << "Warning: No " << tag << " species were found in the kinetic scheme! Are you sure you want to account for the thermophoretic effect?" << std::endl;
+		else
+			std::cout << "Thermophoretic effect: Number of " << tag << " species found equal to " << count << std::endl;
+	}
+} 
+
 /*********************************************************************************************************************/ 
 
 // Batch reactor homogeneous: ode parameters

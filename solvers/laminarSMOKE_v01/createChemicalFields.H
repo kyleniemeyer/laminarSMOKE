@@ -90,7 +90,7 @@ for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 				mesh.time().timeName(),
 				mesh,
 				IOobject::NO_READ,
-				IOobject::AUTO_WRITE
+				IOobject::NO_WRITE
 			),
 			mesh,
 			dimensionSet(0, 2, -1, 0, 0)

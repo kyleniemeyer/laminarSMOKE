@@ -10,6 +10,14 @@ tmp<fv::convectionScheme<scalar> > mvConvection
     )
 );
 
+if (thermophoreticEffect == true)
+{
+	Info << "Calculating thermophoretic effect... " << endl;
+	rhoVT = -0.55*mu*fvc::grad(T)/T;
+	VT = rhoVT/rho;
+}
+word thermophoreticDivScheme("div(rhoVT,Yi)");
+
 {
     double tStart = OpenSMOKE::OpenSMOKEGetCpuTime();
     
@@ -39,55 +47,118 @@ tmp<fv::convectionScheme<scalar> > mvConvection
 
 				if (diffusivityCorrection == DIFFUSIVITY_CORRECTION_SEMI_IMPLICIT)
 				{
-					fvScalarMatrix YiEqn
-					(
-						fvm::ddt(rho, Yi)
-					  + mvConvection->fvmDiv(phi, Yi)
-					  - fvm::laplacian(rho*Dmixi, Yi)
-					  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
-					  + sumDiffusionCorrections
-					 ==
-						fvOptions(rho, Yi)
-					);
+					if (thermophoreticEffectList[i] == true)
+					{
+						fvScalarMatrix YiEqn
+						(
+							fvm::ddt(rho, Yi)
+						  + mvConvection->fvmDiv(phi, Yi)
+						  - fvm::laplacian(rho*Dmixi, Yi)
+						  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
+						  + sumDiffusionCorrections
+						  + fvc::div(rhoVT*Yi,thermophoreticDivScheme)
+						 ==
+							fvOptions(rho, Yi)
+						);
 
-					YiEqn.relax();
-					fvOptions.constrain(YiEqn);
-					YiEqn.solve(mesh.solver("Yi"));
-					fvOptions.correct(Yi);						
+						YiEqn.relax();
+						fvOptions.constrain(YiEqn);
+						YiEqn.solve(mesh.solver("Yi"));
+						fvOptions.correct(Yi);
+					}
+					else
+					{
+						fvScalarMatrix YiEqn
+						(
+							fvm::ddt(rho, Yi)
+						  + mvConvection->fvmDiv(phi, Yi)
+						  - fvm::laplacian(rho*Dmixi, Yi)
+						  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
+						  + sumDiffusionCorrections
+						 ==
+							fvOptions(rho, Yi)
+						);
+
+						YiEqn.relax();
+						fvOptions.constrain(YiEqn);
+						YiEqn.solve(mesh.solver("Yi"));
+						fvOptions.correct(Yi);
+					}						
 				}
 				else if (diffusivityCorrection == DIFFUSIVITY_CORRECTION_EXPLICIT)
-				{					
-					fvScalarMatrix YiEqn
-					(
-						fvm::ddt(rho, Yi)
-					  + mvConvection->fvmDiv(phi, Yi)
-					  - fvm::laplacian(rho*Dmixi, Yi)
-					  + sumDiffusionCorrections
-					 ==
-						fvOptions(rho, Yi)
-					);
+				{		
+					if (thermophoreticEffectList[i] == true)
+					{			
+						fvScalarMatrix YiEqn
+						(
+							fvm::ddt(rho, Yi)
+						  + mvConvection->fvmDiv(phi, Yi)
+						  - fvm::laplacian(rho*Dmixi, Yi)
+						  + sumDiffusionCorrections
+						  + fvc::div(rhoVT*Yi,thermophoreticDivScheme)
+						 ==
+							fvOptions(rho, Yi)
+						);
 
-					YiEqn.relax();
-					fvOptions.constrain(YiEqn);
-					YiEqn.solve(mesh.solver("Yi"));
-					fvOptions.correct(Yi);			
+						YiEqn.relax();
+						fvOptions.constrain(YiEqn);
+						YiEqn.solve(mesh.solver("Yi"));
+						fvOptions.correct(Yi);			
+					}
+					else
+					{			
+						fvScalarMatrix YiEqn
+						(
+							fvm::ddt(rho, Yi)
+						  + mvConvection->fvmDiv(phi, Yi)
+						  - fvm::laplacian(rho*Dmixi, Yi)
+						  + sumDiffusionCorrections
+						 ==
+							fvOptions(rho, Yi)
+						);
+
+						YiEqn.relax();
+						fvOptions.constrain(YiEqn);
+						YiEqn.solve(mesh.solver("Yi"));
+						fvOptions.correct(Yi);			
+					}
 				}
 			}
 			else
 			{
-				fvScalarMatrix YiEqn
-				(
-					fvm::ddt(rho, Yi)
-				  + mvConvection->fvmDiv(phi, Yi)
-				  - fvm::laplacian(rho*Dmixi, Yi)
-				 ==
-					fvOptions(rho, Yi)
-				);
+				if (thermophoreticEffectList[i] == true)
+				{
+					fvScalarMatrix YiEqn
+					(
+						fvm::ddt(rho, Yi)
+					  + mvConvection->fvmDiv(phi, Yi)
+					  - fvm::laplacian(rho*Dmixi, Yi)
+					  + fvc::div(rhoVT*Yi,thermophoreticDivScheme)
+					 ==
+						fvOptions(rho, Yi)
+					);
 
-				YiEqn.relax();
-				fvOptions.constrain(YiEqn);
-				YiEqn.solve(mesh.solver("Yi"));
-				fvOptions.correct(Yi);			
+					YiEqn.relax();
+					fvOptions.constrain(YiEqn);
+					YiEqn.solve(mesh.solver("Yi"));
+					fvOptions.correct(Yi);	
+				}
+				else
+				{
+					fvScalarMatrix YiEqn
+					(
+						fvm::ddt(rho, Yi)
+					  + mvConvection->fvmDiv(phi, Yi)
+					  - fvm::laplacian(rho*Dmixi, Yi)
+					 ==
+						fvOptions(rho, Yi)
+					);
+
+					YiEqn.relax();
+					fvOptions.constrain(YiEqn);
+					YiEqn.solve(mesh.solver("Yi"));
+					fvOptions.correct(Yi);	
+				}
 			}
 
             Yi.max(0.0);
