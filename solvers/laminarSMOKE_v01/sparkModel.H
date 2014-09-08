@@ -44,33 +44,33 @@ public:
 			
 			if (ignitionCell == -1)
 			{
-				Info << "FOAM ERROR:\n theorical ignition position does not correspond to any cell.\n Please check position\nIn file constant/solverOptions.H\n"<<endl;
-				abort();
+				Info << "Warning: theorical ignition position does not correspond to any cell." << endl;
 			}
-			else Info << "Ignition cell center: " << centres[ignitionCell] << ". Original position: " << position_ <<endl;
-
-			scalar radius = ignitionDiameter_/2.0;
-			ignCellsList_.setSize(1);
-			ignCellsList_[0] = ignitionCell;
-
-			forAll(centres, celli)
+			else 
 			{
-				scalar dist = mag(centres[celli] - position_);
+				Info << "Ignition cell center: " << centres[ignitionCell] << ". Original position: " << position_ <<endl;
 
-				if (dist < radius && celli != ignitionCell)
+				scalar radius = ignitionDiameter_/2.0;
+				ignCellsList_.setSize(1);
+				ignCellsList_[0] = ignitionCell;
+
+				forAll(centres, celli)
 				{
-					ignCellsList_.setSize(nIgnCells_+1);
+					scalar dist = mag(centres[celli] - position_);
 
-					ignCellsList_[nIgnCells_] = celli;
-
-					nIgnCells_++;
+					if (dist < radius && celli != ignitionCell)
+					{
+						ignCellsList_.setSize(nIgnCells_+1);
+						ignCellsList_[nIgnCells_] = celli;
+						nIgnCells_++;
+					}
 				}
-			}
 
-			if (ignCellsList_.size() > 0) 
-				Info << "Added " << nIgnCells_ << " cells to ignition point.\n" <<endl;
-			else
-				Info << "The solver wasn't able to find more than one cell in the ignition point.\n" <<endl;
+				if (ignCellsList_.size() > 0) 
+					Info << "Added " << nIgnCells_ << " cells to ignition point" << endl;
+				else
+					Info << "The solver wasn't able to find more than one cell in the ignition point" <<endl;
+			}
 		}
 	}
 	
@@ -89,5 +89,5 @@ private:
 	scalar ignitionTemperature_;
 	scalar ignitionDiameter_;
 	labelList ignCellsList_;
-    label nIgnCells_;
+    	label nIgnCells_;
 };

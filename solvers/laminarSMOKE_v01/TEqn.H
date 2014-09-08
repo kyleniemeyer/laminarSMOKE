@@ -7,7 +7,7 @@
 
 			for (label i=0; i<Y.size(); i++)
 			{
-				volScalarField& Yi 		= Y[i];			
+				volScalarField& Yi 	= Y[i];			
 				volScalarField& Dmixi 	= Dmix[i];
 				volScalarField& Cpi 	= CpSpecies[i];
 		

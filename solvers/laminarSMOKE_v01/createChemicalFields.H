@@ -6,6 +6,8 @@ PtrList<volScalarField> Y(thermodynamicsMapXML->NumberOfSpecies());
 PtrList<volScalarField> Dmix(thermodynamicsMapXML->NumberOfSpecies());
 PtrList<volScalarField> CpSpecies(thermodynamicsMapXML->NumberOfSpecies());
 
+PtrList<volScalarField> FormationRates(outputFormationRatesIndices.size());
+
 // Loop over all the species in the kinetic mechanism
 for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 {
@@ -84,11 +86,11 @@ for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 			(
 			IOobject
 			(
-				"Dmix_"+ thermodynamicsMapXML->NamesOfSpecies()[i],
+				"gas::Dmix_"+ thermodynamicsMapXML->NamesOfSpecies()[i],
 				mesh.time().timeName(),
 				mesh,
 				IOobject::NO_READ,
-				IOobject::NO_WRITE
+				IOobject::AUTO_WRITE
 			),
 			mesh,
 			dimensionSet(0, 2, -1, 0, 0)
@@ -114,4 +116,27 @@ for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 		);
 	}
 
+	if (outputFormationRatesIndices.size() != 0)
+	{
+		for (int i=0;i<outputFormationRatesIndices.size();i++)
+		{
+			FormationRates.set
+			(
+				i,
+				new volScalarField
+				(
+					IOobject
+					(
+						"R::" + thermodynamicsMapXML->NamesOfSpecies()[outputFormationRatesIndices(i)],
+						mesh.time().timeName(),
+						mesh,
+						IOobject::NO_READ,
+						IOobject::AUTO_WRITE
+					),
+					mesh,
+					dimensionedScalar("R", dimensionSet(1, -3, -1, 0, 0), 0.0)
+				)
+			);
+		}
+	}
 }

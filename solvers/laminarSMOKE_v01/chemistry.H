@@ -1,6 +1,7 @@
 {
 	//- Initial conditions
 	scalarField& TCells = T.internalField();
+	scalarField& QCells = Q.internalField();
 	const scalarField& pCells = p.internalField();
 	const scalarField& rhoCells = rho.internalField();
 	const scalarField& vCells = mesh.V();
@@ -104,6 +105,31 @@
 					Info <<"   Accomplished: " << counter << "/" << mesh.nCells() << endl;
 
 				counter++;
+
+				// Output
+				if (runTime.outputTime())
+				{
+					if (constPressureBatchReactor == true)
+					{
+						QCells[celli] = batchReactorHomogeneousConstantPressure.QR();
+						if (outputFormationRatesIndices.size() != 0)
+						{
+							for (int i=0;i<outputFormationRatesIndices.size();i++)
+								FormationRates[i].internalField()[celli] = batchReactorHomogeneousConstantPressure.R()[outputFormationRatesIndices[i]+1] *
+                                       	      		                                                   thermodynamicsMapXML->MW()[outputFormationRatesIndices[i]+1];
+						}
+					}
+					else
+					{
+						QCells[celli] = batchReactorHomogeneousConstantVolume.QR();
+						if (outputFormationRatesIndices.size() != 0)
+						{
+							for (int i=0;i<outputFormationRatesIndices.size();i++)
+								FormationRates[i].internalField()[celli] = batchReactorHomogeneousConstantVolume.R()[outputFormationRatesIndices[i]+1] *
+                                           	                                                           thermodynamicsMapXML->MW()[outputFormationRatesIndices[i]+1];
+						}
+					}
+				}
 			}
 			double tEnd = OpenSMOKE::OpenSMOKEGetCpuTime();
 			
@@ -263,6 +289,31 @@
 					Info <<"   Accomplished: " << counter << "/" << mesh.nCells() << endl;
 
 				counter++;
+
+				// Output
+				if (runTime.outputTime())
+				{
+					if (constPressureBatchReactor == true)
+					{
+						QCells[celli] = batchReactorHomogeneousConstantPressure.QR();
+						if (outputFormationRatesIndices.size() != 0)
+						{
+							for (int i=0;i<outputFormationRatesIndices.size();i++)
+								FormationRates[i].internalField()[celli] = batchReactorHomogeneousConstantPressure.R()[outputFormationRatesIndices[i]+1] *
+                                       	      		                                                   thermodynamicsMapXML->MW()[outputFormationRatesIndices[i]+1];
+						}
+					}
+					else
+					{
+						QCells[celli] = batchReactorHomogeneousConstantVolume.QR();
+						if (outputFormationRatesIndices.size() != 0)
+						{
+							for (int i=0;i<outputFormationRatesIndices.size();i++)
+								FormationRates[i].internalField()[celli] = batchReactorHomogeneousConstantVolume.R()[outputFormationRatesIndices[i]+1] *
+                                           	                                                           thermodynamicsMapXML->MW()[outputFormationRatesIndices[i]+1];
+						}
+					}
+				}
 			}
 			double tEnd = OpenSMOKE::OpenSMOKEGetCpuTime();
 			

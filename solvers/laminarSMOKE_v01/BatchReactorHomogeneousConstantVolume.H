@@ -15,6 +15,9 @@ public:
 	
 	void SetCheckMassFractions( const bool flag ) { checkMassFractions_ = flag; };
 
+	const OpenSMOKE::OpenSMOKEVectorDouble& R() const { return R_; }
+	double QR() const { return QR_; }
+
 	unsigned int NumberOfEquations() { return NE_; }
 
 	virtual int Equations(const double t, const OpenSMOKE::OpenSMOKEVectorDouble& y, OpenSMOKE::OpenSMOKEVectorDouble& dy);
@@ -31,6 +34,7 @@ private:
 	double cTot_;
 	double MW_;
 	double CvMixMass_;
+	double QR_;
 
 	unsigned int NC_;
 	unsigned int NE_;
@@ -54,6 +58,7 @@ BatchReactorHomogeneousConstantVolume::BatchReactorHomogeneousConstantVolume(	Op
 	{
 		NC_ = thermodynamicsMap_.NumberOfSpecies();
 		NE_ = NC_+1;
+		QR_ = 0.;
 		
 		ChangeDimensions(NC_, &omega_, true);
 		ChangeDimensions(NC_, &x_, true);
@@ -116,7 +121,7 @@ int BatchReactorHomogeneousConstantVolume::Equations(const double t, const OpenS
 		thermodynamicsMap_.cpMolar_Mixture_From_MoleFractions(CpMixMolar,x_);
 		CvMixMass_ = (CpMixMolar - PhysicalConstants::R_J_kmol) / MW_;
 	
-		const double QR_ = kineticsMap_.HeatRelease(R_);
+		QR_ = kineticsMap_.HeatRelease(R_);
 		const double sumMoleFormationRates = R_.SumElements();
 		
 		dy[NC_+1]  = (QR_ + PhysicalConstants::R_J_kmol*T_*sumMoleFormationRates) / (rho0_*CvMixMass_);

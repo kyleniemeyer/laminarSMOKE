@@ -15,6 +15,9 @@ public:
 	
 	void SetCheckMassFractions( const bool flag ) { checkMassFractions_ = flag; };
 
+	const OpenSMOKE::OpenSMOKEVectorDouble& R() const { return R_; }
+	double QR() const { return QR_; }
+
 	unsigned int NumberOfEquations() const { return NE_; }
 
 	virtual int Equations(const double t, const OpenSMOKE::OpenSMOKEVectorDouble& y, OpenSMOKE::OpenSMOKEVectorDouble& dy);
@@ -30,6 +33,7 @@ private:
 	double cTot_;
 	double MW_;
 	double CpMixMass_;
+	double QR_;
 
 	unsigned int NC_;
 	unsigned int NE_;
@@ -53,6 +57,7 @@ BatchReactorHomogeneousConstantPressure::BatchReactorHomogeneousConstantPressure
 	{
 		NC_ = thermodynamicsMap_.NumberOfSpecies();
 		NE_ = NC_+1;
+		QR_ = 0.;
 		
 		ChangeDimensions(NC_, &omega_, true);
 		ChangeDimensions(NC_, &x_, true);
@@ -87,7 +92,7 @@ int BatchReactorHomogeneousConstantPressure::Equations(const double t, const Ope
 	// Calculates the pressure and the concentrations of species
 	thermodynamicsMap_.MoleFractions_From_MassFractions(x_, MW_, omega_);
 	cTot_ = P0_/PhysicalConstants::R_J_kmol/T_;
-    rho_ = cTot_*MW_;
+    	rho_ = cTot_*MW_;
 	Product(cTot_, x_, &c_);
 
 	// Calculates thermodynamic properties
@@ -105,14 +110,14 @@ int BatchReactorHomogeneousConstantPressure::Equations(const double t, const Ope
 	for (unsigned int i=1;i<=NC_;++i)	
 		dy[i] = thermodynamicsMap_.MW()[i]*R_[i]/rho_;
            
-    // Energy equation
-    dy[NC_+1] = 0.;     
-    if (energyEquation_ == true)
-    {
+    	// Energy equation
+    	dy[NC_+1] = 0.;     
+    	if (energyEquation_ == true)
+    	{
 		double CpMixMolar; 
 		thermodynamicsMap_.cpMolar_Mixture_From_MoleFractions(CpMixMolar,x_);
 		CpMixMass_ = CpMixMolar / MW_;
-		const double QR_ = kineticsMap_.HeatRelease(R_);
+		QR_ = kineticsMap_.HeatRelease(R_);
 		
 		dy[NC_+1]  = QR_ / (rho_*CpMixMass_);
 	}

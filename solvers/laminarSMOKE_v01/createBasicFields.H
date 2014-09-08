@@ -132,12 +132,27 @@ volScalarField Qrad
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
-        IOobject::AUTO_WRITE
+        IOobject::NO_WRITE
     ),
     mesh,
     dimensionedScalar("Qrad", dimensionSet(1, -1, -3, 0, 0), 0.0)
 );
-Qrad = dimensionedScalar("zero", dimensionSet(1, -1, -3, 0, 0), 0.);
+
+//- Allocating memory for radiative heat transfer term [W/m3]
+volScalarField Q
+(
+    IOobject
+    (
+        "thermo::Q",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("thermo::Q", dimensionSet(1, -1, -3, 0, 0), 0.0)
+);
+
 
 //- Allocating memory for mean specific heat [J/kg/K]
 Info<< "Creating field Cp\n" << endl;
@@ -149,7 +164,7 @@ volScalarField cp
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh,
     dimensionSet(0, 2, -2, -1, 0)

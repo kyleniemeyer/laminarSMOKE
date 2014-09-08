@@ -129,6 +129,32 @@ const dictionary& sparkDictionary = solverOptions.subDict("Spark");
 sparkModel spark;
 spark.Read(sparkDictionary);
 
+Eigen::VectorXd outputFormationRatesIndices;
+Eigen::VectorXd outputDiffusivitiesIndices;
+const dictionary& outputDictionary = solverOptions.subDict("Output"); 
+{
+	{
+		Switch outputFormationRates = Switch(outputDictionary.lookup(word("formationRates")));
+		if (outputFormationRates == true)
+		{
+			List<word>  listFormationRates(outputDictionary.lookup("listFormationRates"));
+			outputFormationRatesIndices.resize(listFormationRates.size());
+			for (int i=0;i<listFormationRates.size();i++)
+				outputFormationRatesIndices(i) = thermodynamicsMapXML->IndexOfSpecies(listFormationRates[i])-1;
+		}
+	}
+
+	{
+		Switch outputDiffusivities = Switch(outputDictionary.lookup(word("diffusivities")));
+		if (outputDiffusivities == true)
+		{
+			List<word>  listDiffusivities(outputDictionary.lookup("listDiffusivities"));
+			outputDiffusivitiesIndices.resize(listDiffusivities.size());
+			for (int i=0;i<listDiffusivities.size();i++)
+				outputDiffusivitiesIndices(i) = thermodynamicsMapXML->IndexOfSpecies(listDiffusivities[i])-1;
+		}
+	}
+}
 /*********************************************************************************************************************/ 
 
 // Batch reactor homogeneous: ode parameters
