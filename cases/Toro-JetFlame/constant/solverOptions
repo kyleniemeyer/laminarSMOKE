@@ -31,8 +31,21 @@ PhysicalModel
 	massDiffusionInEnergyEquation	on;
 	diffusivityCorrection		"semi-implicit";
 	diffusivityModel		"multi-component";
+	soretEffect			on;
 
 	includeDpDt			off;
+}
+
+Output
+{
+	formationRates		off;
+	diffusivities		off;
+}
+
+ThermophoreticEffect
+{
+	thermophoreticEffect 	off;
+	thermophoreticEffectTag "BIN";
 }
 
 OdeHomogeneous

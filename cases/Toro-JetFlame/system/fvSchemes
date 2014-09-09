@@ -27,18 +27,15 @@ gradSchemes
 
 divSchemes
 {
-    default         none;
+    default         			none;
 
-    div(phi,U)      Gauss limitedLinearV 1;
-    div(rhoVT,Yi)      Gauss linear;
-    div(phi,Yi)     Gauss limitedLinear 1;
-    div(phi,T)     Gauss limitedLinear 1;
-    div(phi,K)      Gauss limitedLinear 1;
-    div(phid,p)     Gauss limitedLinear 1;
-    div(phi,epsilon) Gauss limitedLinear 1;
-    div(phi,k) Gauss limitedLinear 1;
-    div(phiU,p) Gauss limitedLinear 1;
-    div((gas::mu*dev2(grad(U).T()))) Gauss linear;
+    div(phi,U)      			Gauss limitedLinearV 1;
+    div(phi,T)      			Gauss limitedLinear  1;
+    div(rhoVT,Yi)   			Gauss limitedLinear  1;
+    soretEffect                         Gauss linear;
+    div(phi,Yi)     			Gauss limitedLinear01 1;
+
+    div((gas::mu*dev2(grad(U).T()))) 	Gauss linear;
 
 }
 

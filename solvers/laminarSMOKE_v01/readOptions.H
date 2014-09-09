@@ -62,13 +62,24 @@ Switch constPressureBatchReactor;
 Switch includeDpDt;
 Switch soretEffect;
 Eigen::VectorXd LewisNumbers;
+std::vector<bool> soretEffectList;
+std::vector<int> indexSoret;
 const dictionary& physicalModelDictionary = solverOptions.subDict("PhysicalModel");
 {
 	energyEquation = Switch(physicalModelDictionary.lookup(word("energyEquation")));
 	homogeneousReactions = Switch(physicalModelDictionary.lookup(word("homogeneousReactions")));
 	includeDpDt = Switch(physicalModelDictionary.lookup(word("includeDpDt")));
 	iMassDiffusionInEnergyEquation = Switch(physicalModelDictionary.lookup(word("massDiffusionInEnergyEquation")));
+	
+	// Soret effect
 	soretEffect = Switch(physicalModelDictionary.lookup(word("soretEffect")));
+	soretEffectList.resize(thermodynamicsMapXML->NumberOfSpecies());
+	indexSoret.resize(thermodynamicsMapXML->NumberOfSpecies());
+
+	for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
+		soretEffectList[i] = false;	
+	for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
+		indexSoret[i] = -1;
 
 	// Diffusivity 
 	{
@@ -164,8 +175,6 @@ std::vector<bool> thermophoreticEffectList;
 const dictionary& thermophoreticEffectDictionary = solverOptions.subDict("ThermophoreticEffect");
 { 
 	thermophoreticEffect = Switch(thermophoreticEffectDictionary.lookup(word("thermophoreticEffect")));
-	word tag = thermophoreticEffectDictionary.lookup(word("thermophoreticEffectTag"));
-	 
 	thermophoreticEffectList.resize(thermodynamicsMapXML->NumberOfSpecies());
 	for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 		thermophoreticEffectList[i] = false;
@@ -173,6 +182,8 @@ const dictionary& thermophoreticEffectDictionary = solverOptions.subDict("Thermo
 	// Populate the list of thermophoretic species
 	if (thermophoreticEffect == true)
 	{
+		word tag = thermophoreticEffectDictionary.lookup(word("thermophoreticEffectTag"));
+
 		unsigned int count = 0;
 		for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 		{

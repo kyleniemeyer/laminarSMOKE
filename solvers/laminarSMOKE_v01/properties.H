@@ -73,7 +73,14 @@
 
 			// Thermal diffusion coefficients [-]
 			if (soretEffect == true)
-				transportMapXML->ThermalDiffusionRatios(tetamixvector, moleFractions);			
+			{
+				transportMapXML->ThermalDiffusionRatios(tetamixvector, moleFractions);		
+				for(int i=0;i<transportMapXML->iThermalDiffusionRatios().size();i++)
+				{
+					unsigned int index = transportMapXML->iThermalDiffusionRatios()[i];
+					Dsoret[i].internalField()[celli] =Dmix[index-1].internalField()[celli]*tetamixvector[index]*thermodynamicsMapXML->MW()[index]/MWmixCells[celli];
+				} 
+			}	
 		}
     }
 
@@ -129,7 +136,7 @@
 					for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 						CpSpecies[i].boundaryField()[patchi][facei] = CpVector[i+1] / thermodynamicsMapXML->MW()[i+1];
 				}
-			}
+			} 
 			
 			if (diffusivityModel == DIFFUSIVITY_MODEL_MULTICOMPONENT)
 			{
@@ -146,7 +153,14 @@
 
 			// Thermal diffusion coefficients [-]
 			if (soretEffect == true)
+			{
 				transportMapXML->ThermalDiffusionRatios(tetamixvector, moleFractions);
+				for(int i=0;i<transportMapXML->iThermalDiffusionRatios().size();i++)
+				{
+					unsigned int index = transportMapXML->iThermalDiffusionRatios()[i];
+					Dsoret[i].boundaryField()[patchi][facei] = Dmix[index-1].boundaryField()[patchi][facei]*tetamixvector[index]*thermodynamicsMapXML->MW()[index]/pMWmix[facei];
+				}
+			}
 		}
 	}
 }

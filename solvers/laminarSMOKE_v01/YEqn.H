@@ -17,6 +17,7 @@ if (thermophoreticEffect == true)
 	VT = rhoVT/rho;
 }
 word thermophoreticDivScheme("div(rhoVT,Yi)");
+word soretDivScheme("soretEffect");
 
 {
     double tStart = OpenSMOKE::OpenSMOKEGetCpuTime();
@@ -66,23 +67,45 @@ word thermophoreticDivScheme("div(rhoVT,Yi)");
 						YiEqn.solve(mesh.solver("Yi"));
 						fvOptions.correct(Yi);
 					}
-					else
+					else 
 					{
-						fvScalarMatrix YiEqn
-						(
-							fvm::ddt(rho, Yi)
-						  + mvConvection->fvmDiv(phi, Yi)
-						  - fvm::laplacian(rho*Dmixi, Yi)
-						  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
-						  + sumDiffusionCorrections
-						 ==
-							fvOptions(rho, Yi)
-						);
+						if (soretEffectList[i] == true)
+						{
+							fvScalarMatrix YiEqn
+							(
+								fvm::ddt(rho, Yi)
+							  + mvConvection->fvmDiv(phi, Yi)
+							  - fvm::laplacian(rho*Dmixi, Yi)
+							  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
+							  + sumDiffusionCorrections
+							  + fvc::div(rho*Dsoret[indexSoret[i]]/T*fvc::grad(T),soretDivScheme)
+							 ==
+								fvOptions(rho, Yi)
+							);
 
-						YiEqn.relax();
-						fvOptions.constrain(YiEqn);
-						YiEqn.solve(mesh.solver("Yi"));
-						fvOptions.correct(Yi);
+							YiEqn.relax();
+							fvOptions.constrain(YiEqn);
+							YiEqn.solve(mesh.solver("Yi"));
+							fvOptions.correct(Yi);
+						}
+						else
+						{
+							fvScalarMatrix YiEqn
+							(
+								fvm::ddt(rho, Yi)
+							  + mvConvection->fvmDiv(phi, Yi)
+							  - fvm::laplacian(rho*Dmixi, Yi)
+							  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
+							  + sumDiffusionCorrections
+							 ==
+								fvOptions(rho, Yi)
+							);
+
+							YiEqn.relax();
+							fvOptions.constrain(YiEqn);
+							YiEqn.solve(mesh.solver("Yi"));
+							fvOptions.correct(Yi);
+						}				
 					}						
 				}
 				else if (diffusivityCorrection == DIFFUSIVITY_CORRECTION_EXPLICIT)
