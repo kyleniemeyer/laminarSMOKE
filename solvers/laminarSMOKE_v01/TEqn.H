@@ -15,20 +15,40 @@
 			}
 		}
 
-		fvScalarMatrix TEqn
-		(
-			  cp*fvm::ddt(rho,T)
-			+ cp*fvm::div(phi, T)		    
-		 ==
-		    fvm::laplacian(lambda,T) + 
-		    sumCpSpecies + DpDt +
-		    cp*fvOptions(rho, T)
-		);
+		if (radiativeHeatTransfer.radiationModel() == RADIATION_NONE)
+		{
+			fvScalarMatrix TEqn
+			(
+				  cp*fvm::ddt(rho,T)
+				+ cp*fvm::div(phi, T)		    
+				 ==
+		    		fvm::laplacian(lambda,T) + 
+		   	 	sumCpSpecies + DpDt +
+		    		cp*fvOptions(rho, T)
+			);
 
-		TEqn.relax();
-		fvOptions.constrain(TEqn);
-		TEqn.solve(mesh.solver("T"));
-		fvOptions.correct(T);	
+			TEqn.relax();
+			fvOptions.constrain(TEqn);
+			TEqn.solve(mesh.solver("T"));
+			fvOptions.correct(T);	
+		}
+		else
+		{
+			fvScalarMatrix TEqn
+			(
+				  cp*fvm::ddt(rho,T)
+				+ cp*fvm::div(phi, T)		    
+				 ==
+		    		fvm::laplacian(lambda,T) + 
+		   	 	sumCpSpecies + DpDt - Qrad +
+		    		cp*fvOptions(rho, T)
+			);
+
+			TEqn.relax();
+			fvOptions.constrain(TEqn);
+			TEqn.solve(mesh.solver("T"));
+			fvOptions.correct(T);
+		}
     }
 
     Info<< " * T gas min/max (after transport)   = " << min(T).value() << ", " << max(T).value() << endl;

@@ -50,6 +50,7 @@ Description
 
 // Additional include files
 #include "sparkModel.H"
+#include "radiativeHeatTransferClass.H"
 #include "utilities.H"
 
 // Homogeneous reactors

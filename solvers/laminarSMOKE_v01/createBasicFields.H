@@ -128,17 +128,32 @@ volScalarField Qrad
 (
     IOobject
     (
-        "Qrad",
+        "rad::Qrad",
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh,
-    dimensionedScalar("Qrad", dimensionSet(1, -1, -3, 0, 0), 0.0)
+    dimensionedScalar("rad::Qrad", dimensionSet(1, -1, -3, 0, 0), 0.0)
 );
 
-//- Allocating memory for radiative heat transfer term [W/m3]
+//- Allocating memory for Planck mean absorption coefficient [1/m]
+volScalarField aPlanck
+(
+    IOobject
+    (
+        "rad::aPlanck",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("rad::aPlanck", dimensionSet(0, 0, -1, 0, 0), 0.0)
+);
+
+//- Allocating memory for reaction heat [W/m3]
 volScalarField Q
 (
     IOobject
@@ -152,6 +167,8 @@ volScalarField Q
     mesh,
     dimensionedScalar("thermo::Q", dimensionSet(1, -1, -3, 0, 0), 0.0)
 ); 
+
+
  
 Info<< "Creating VT\n" << endl;
 volVectorField VT

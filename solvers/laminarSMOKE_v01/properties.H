@@ -18,6 +18,8 @@
 		scalarField& cvCells = cv.internalField();
 		scalarField& hCells = h.internalField();
 		scalarField& MWmixCells = MWmix.internalField();
+		scalarField& aPlanckCells = aPlanck.internalField();
+		scalarField& QradCells = Qrad.internalField();
 
 		forAll(TCells, celli)
 		{
@@ -43,11 +45,11 @@
 				transportMapXML->DynamicViscosity(muCells[celli],moleFractions);
 			}
 
-            if (energyEquation == true || diffusivityModel == DIFFUSIVITY_MODEL_LEWIS_NUMBERS)
-            {
+            		if (energyEquation == true || diffusivityModel == DIFFUSIVITY_MODEL_LEWIS_NUMBERS)
+            		{
 				transportMapXML->ThermalConductivity(lambdaCells[celli],moleFractions);
-                thermodynamicsMapXML->cpMolar_Mixture_From_MoleFractions(cpCells[celli], moleFractions);			//[J/kmol/K]
-                cvCells[celli] = (cpCells[celli]-PhysicalConstants::R_J_kmol)/MWmixCells[celli];
+               			thermodynamicsMapXML->cpMolar_Mixture_From_MoleFractions(cpCells[celli], moleFractions);			//[J/kmol/K]
+                		cvCells[celli] = (cpCells[celli]-PhysicalConstants::R_J_kmol)/MWmixCells[celli];
 				cpCells[celli] = cpCells[celli]/MWmixCells[celli];
 			
 				if (iMassDiffusionInEnergyEquation == true)
@@ -80,7 +82,13 @@
 					unsigned int index = transportMapXML->iThermalDiffusionRatios()[i];
 					Dsoret[i].internalField()[celli] =Dmix[index-1].internalField()[celli]*tetamixvector[index]*thermodynamicsMapXML->MW()[index]/MWmixCells[celli];
 				} 
-			}	
+			}
+
+			if (radiativeHeatTransfer.radiationModel() != RADIATION_NONE)
+			{
+				aPlanckCells[celli] = radiativeHeatTransfer.aPlanck(TCells[celli], pCells[celli], moleFractions);
+				QradCells[celli] = radiativeHeatTransfer.Q(TCells[celli], aPlanckCells[celli]);
+			}
 		}
     }
 
@@ -98,6 +106,8 @@
 		fvPatchScalarField& pcv = cv.boundaryField()[patchi];
 		fvPatchScalarField& ph = h.boundaryField()[patchi];
 		fvPatchScalarField& pMWmix = MWmix.boundaryField()[patchi];
+		fvPatchScalarField& paPlanck = aPlanck.boundaryField()[patchi];
+		fvPatchScalarField& pQrad = Qrad.boundaryField()[patchi];
         
 		forAll(pT, facei)
 		{
@@ -160,6 +170,12 @@
 					unsigned int index = transportMapXML->iThermalDiffusionRatios()[i];
 					Dsoret[i].boundaryField()[patchi][facei] = Dmix[index-1].boundaryField()[patchi][facei]*tetamixvector[index]*thermodynamicsMapXML->MW()[index]/pMWmix[facei];
 				}
+			}
+
+			if (radiativeHeatTransfer.radiationModel() != RADIATION_NONE)
+			{
+				paPlanck[facei] = radiativeHeatTransfer.aPlanck(pT[facei], pp[facei], moleFractions);
+				pQrad[facei] = radiativeHeatTransfer.Q(pT[facei], paPlanck[facei]);
 			}
 		}
 	}
