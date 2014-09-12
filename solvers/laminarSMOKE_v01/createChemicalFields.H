@@ -20,6 +20,45 @@ for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 		IOobject::NO_READ
 	);
 
+	// Sets of diffusivities and specific heats of species
+	{
+		Dmix.set
+		(
+			i,
+			new volScalarField
+			(
+			IOobject
+			(
+				"gas::Dmix_"+ thermodynamicsMapXML->NamesOfSpecies()[i],
+				mesh.time().timeName(),
+				mesh,
+				IOobject::NO_READ,
+				IOobject::NO_WRITE
+			),
+			mesh,
+			dimensionSet(0, 2, -1, 0, 0)
+			)
+		);
+
+		CpSpecies.set
+		(
+			i,
+			new volScalarField
+			(
+				IOobject
+				(
+				"thermo::Cp_"+ thermodynamicsMapXML->NamesOfSpecies()[i],
+				mesh.time().timeName(),
+				mesh,
+				IOobject::NO_READ,
+				IOobject::NO_WRITE
+				),
+				mesh,
+				dimensionSet(0, 2, -2, -1, 0)
+			)
+		);
+	}
+
 	// check if field exists and can be read
 	if (header.headerOk())
 	{
@@ -72,45 +111,6 @@ for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 					IOobject::AUTO_WRITE
 				),
 				Ydefault
-			)
-		);
-	}
-
-	// Sets of diffusivities and specific heats of species
-	{
-		Dmix.set
-		(
-			i,
-			new volScalarField
-			(
-			IOobject
-			(
-				"gas::Dmix_"+ thermodynamicsMapXML->NamesOfSpecies()[i],
-				mesh.time().timeName(),
-				mesh,
-				IOobject::NO_READ,
-				IOobject::NO_WRITE
-			),
-			mesh,
-			dimensionSet(0, 2, -1, 0, 0)
-			)
-		);
-
-		CpSpecies.set
-		(
-			i,
-			new volScalarField
-			(
-				IOobject
-				(
-				"thermo::Cp_"+ thermodynamicsMapXML->NamesOfSpecies()[i],
-				mesh.time().timeName(),
-				mesh,
-				IOobject::NO_READ,
-				IOobject::NO_WRITE
-				),
-				mesh,
-				dimensionSet(0, 2, -2, -1, 0)
 			)
 		);
 	}
