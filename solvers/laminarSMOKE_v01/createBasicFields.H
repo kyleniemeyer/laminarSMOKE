@@ -182,7 +182,7 @@ volVectorField VT
         IOobject::AUTO_WRITE
     ),
     mesh,
-    dimensionedVector("thermo::VT", dimensionSet(0, 1, -1, 0, 0), vector(0., 0., 0.) )
+    dimensionedVector("thermo::VT", dimensionSet(0, 1, -1, 0, 0), Foam::vector(0., 0., 0.) )
 );
 
 Info<< "Creating rhoVT\n" << endl;
@@ -197,7 +197,7 @@ volVectorField rhoVT
         IOobject::NO_WRITE
     ),
     mesh,
-    dimensionedVector("thermo::rhoVT", dimensionSet(1, -2, -1, 0, 0), vector(0., 0., 0.) )
+    dimensionedVector("thermo::rhoVT", dimensionSet(1, -2, -1, 0, 0), Foam::vector(0., 0., 0.) )
 );
 
 //- Allocating memory for mean specific heat [J/kg/K]

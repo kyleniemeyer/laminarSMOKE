@@ -19,11 +19,7 @@
 		// --- Pressure corrector loop
 		while (pimple.correct())
 		{
-			#if OPENFOAM_VERSION == 22
-			#include "pEqn.22.H"
-			#elif OPENFOAM_VERSION == 23
-			#include "pEqn.23.H"
-			#endif
+			#include "pEqn.H"
 		}
 	}
 }

@@ -13,8 +13,8 @@ void normalizeMassFractions(Eigen::VectorXd& omega_plus_temperature, const label
     {
         Info << "WARNING: sum of mass-fractions = " << sumFractions << " in cell " << celli <<endl;
 
-        for(int i=0; i < omega_plus_temperature.size()-1; i++)
-            cout << i << ")\t" << omega_plus_temperature(i) << endl;
+        //for(int i=0; i < omega_plus_temperature.size()-1; i++)
+        //    cout << i << ")\t" << omega_plus_temperature(i) << endl;
         
         if (time == 0)
         {
@@ -38,8 +38,8 @@ void normalizeMassFractions(OpenSMOKE::OpenSMOKEVectorDouble& omega_plus_tempera
     {
         Info << "WARNING: sum of mass-fractions = " << sumFractions << " in cell " << celli <<endl;
 
-        for(int i=1; i <= omega_plus_temperature.Size()-1; i++)
-            cout << i << ")\t" << omega_plus_temperature[i] << endl;
+        //for(int i=1; i <= omega_plus_temperature.Size()-1; i++)
+        //    cout << i << ")\t" << omega_plus_temperature[i] << endl;
         
         if (time == 0)
         {

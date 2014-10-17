@@ -123,3 +123,9 @@ if (odeParameterBatchReactorHomogeneous.type() == OpenSMOKE::ODE_Parameters::ODE
 	mebdfSolverConstantVolume->SetBatchReactorHomogeneousConstantVolume(&batchReactorHomogeneousConstantVolume);
 }
 #endif
+
+#if OPENSMOKE_USE_ISAT == 1
+    #include "memoryAllocation_ISAT.H"
+#endif
+
+

@@ -64,6 +64,8 @@ Switch soretEffect;
 Eigen::VectorXd LewisNumbers;
 std::vector<bool> soretEffectList;
 std::vector<int> indexSoret;
+scalar thermodynamicPressure = 101325.;
+
 const dictionary& physicalModelDictionary = solverOptions.subDict("PhysicalModel");
 {
 	energyEquation = Switch(physicalModelDictionary.lookup(word("energyEquation")));
@@ -135,6 +137,9 @@ const dictionary& physicalModelDictionary = solverOptions.subDict("PhysicalModel
 	
 	//- Constant pressure reactors
 	constPressureBatchReactor = Switch(physicalModelDictionary.lookup(word("constPressureBatchReactor")));
+
+	// Themodynamic pressure [Pa]
+	thermodynamicPressure = readScalar(physicalModelDictionary.lookup("thermodynamicPressure"));
 }
 
 //- Detect spark
@@ -328,5 +333,9 @@ OpenSMOKE::ODE_Parameters odeParameterBatchReactorHomogeneous;
 		#endif
 	}			
 }
+
+#if OPENSMOKE_USE_ISAT == 1
+    #include "readOptions_ISAT.H"
+#endif
 
 Info<< "Solver options correctly read\n" << endl;
