@@ -43,7 +43,7 @@
 						// ISAT Algorithm
 						{
 							for(unsigned int i=0;i<NEQ;i++)
-								phiISAT_HOM(i) = y0(i)*scaleFactor_HOM(i);
+								phiISAT_HOM(i) = y0(i)*scalingFactors_ISAT(i);
 
 							chemComp *phi0base = NULL;
 							if(isat_HOM->retrieve(phiISAT_HOM, phi0base)) 
@@ -55,7 +55,7 @@
 					
 								//check negative value
 								for(unsigned int i=0;i<NEQ;i++)
-									yf(i) = std::max(RphiISAT_HOM(i), 0.)/scaleFactor_HOM(i);
+									yf(i) = std::max(RphiISAT_HOM(i), 0.)/scalingFactors_ISAT(i);
 
 								nRetHOM++;	
 								
@@ -97,7 +97,7 @@
 
 									// Move the solution from DI to ISAT
 									for(unsigned int i=0;i<NEQ;i++)
-										RphiISAT_HOM(i) = std::max(yf(i), 0.)*scaleFactor_HOM(i);
+										RphiISAT_HOM(i) = std::max(yf(i), 0.)*scalingFactors_ISAT(i);
 
 									double t2 = OpenSMOKE::OpenSMOKEGetCpuTime();
 
@@ -122,10 +122,11 @@
 									double t1 = OpenSMOKE::OpenSMOKEGetCpuTime();
 									
 									// compute mapping gradient
-									calcMappingGradient(phiISAT_HOM, RphiISAT_HOM, mapGrad_HOM, scaleFactor_HOM,typeSolver,(tf-t0),&odeSolverConstantPressure);
+									calcMappingGradient(	phiISAT_HOM, RphiISAT_HOM, mapGrad_HOM, scalingFactors_ISAT, 
+												luSolver_ISAT, (tf-t0), numberSubSteps_ISAT, &odeSolverConstantPressure);
 							
 									// add a new leaf 
-									bool flag = isat_HOM->add(phiISAT_HOM, RphiISAT_HOM, mapGrad_HOM, phi0base); 
+									bool flag = isat_HOM->add(phiISAT_HOM, RphiISAT_HOM, mapGrad_HOM, qrSolver_ISAT, phi0base); 
 						
 									if(flag == false)	
 										Info << "ISAT Error - Addition process failed..." << endl;

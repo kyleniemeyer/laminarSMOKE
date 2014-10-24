@@ -1,11 +1,14 @@
 //- Reading ISAT parameters
-Switch isatCheck(solverOptions.subDict("ISAT").lookup("ISAT_IntegrationMethod"));
+Switch isatCheck(solverOptions.subDict("ISAT").lookup("ISAT"));
+
 
 // mandatory if ISAT ON
-scalar epsTol_HOM = solverOptions.subDict("ISAT").lookupOrDefault<double>("epsTolISAT_HOM", epsTol_HOM);
+scalar epsilon_ISAT = solverOptions.subDict("ISAT").lookupOrDefault<double>("tolerance", 1e-4);
+label  numberSubSteps_ISAT = solverOptions.subDict("ISAT").lookupOrDefault<int>("numberSubSteps", 1);
+
 scalar maxSizeMRU = solverOptions.subDict("ISAT").lookupOrDefault<int>("maxSizeMRU", 100);
 scalar maxSizeMFU = solverOptions.subDict("ISAT").lookupOrDefault<int>("maxSizeMFU", 100);
-scalar maxSizeBT = solverOptions.subDict("ISAT").lookupOrDefault<int>("maxSizeBT", 50000);
+scalar maxSizeBT = solverOptions.subDict("ISAT").lookupOrDefault<int>("maxSizeBT", 100000);
 scalar maxSearchMRU = solverOptions.subDict("ISAT").lookupOrDefault<int>("maxSearchMRU", 10);
 scalar maxSearchMFU = solverOptions.subDict("ISAT").lookupOrDefault<int>("maxSearchMFU", 30);
 Switch searchMRU(solverOptions.subDict("ISAT").lookupOrDefault<Switch>("searchMRU", true)); 
@@ -16,64 +19,81 @@ scalar maxTimeOldCoeff = solverOptions.subDict("ISAT").lookupOrDefault<double>("
 scalar maxGrowCoeff = solverOptions.subDict("ISAT").lookupOrDefault<double>("maxGrowCoeff", 0.5);
 scalar maxHeightCoeff = solverOptions.subDict("ISAT").lookupOrDefault<double>("maxHeightCoeff", 20.);
 scalar maxUsedCoeff = solverOptions.subDict("ISAT").lookupOrDefault<double>("maxUsedCoeff", 20.);
-Switch printStats(solverOptions.subDict("ISAT").lookupOrDefault("stats", false));
-word typeMapGradSolver = solverOptions.subDict("ISAT").lookupOrDefault<word>("typeMapGradSolver","PartialPiv");
+Switch printStats(solverOptions.subDict("ISAT").lookupOrDefault("statistics", false));
+word   luFactorization = solverOptions.subDict("ISAT").lookupOrDefault<word>("luFactorization","Partial");
+word   qrFactorization = solverOptions.subDict("ISAT").lookupOrDefault<word>("qrFactorization","Full");
 
-int typeSolver = 0;
-if (typeMapGradSolver != "PartialPiv" && typeMapGradSolver != "FullPiv")
+int luSolver_ISAT = 1;
+if (luFactorization != "Partial" && luFactorization != "Full")
 {
-	Info << "Wrong typeMapGradSolver options: PartialPiv || FullPiv" << endl;
+	Info << "Wrong luFactorization options: Partial || Full" << endl;
 	abort();
 } 
 else 
 {
-	if(typeMapGradSolver == "FullPiv") 
-		typeSolver = 0;
+	if (luFactorization == "Full") 
+		luSolver_ISAT = 0;
 	else
-		typeSolver = 1;		
+		luSolver_ISAT = 1;		
+}
+
+int qrSolver_ISAT = 0;
+if (qrFactorization != "NoPivoting" && qrFactorization != "Partial" && qrFactorization != "Full")
+{
+	Info << "Wrong qrFactorization options: NoPivoting || Partial || Full" << endl;
+	abort();
+} 
+else 
+{
+	if (qrFactorization == "Full") 
+		qrSolver_ISAT = 0;
+	else if (qrFactorization == "Partial") 
+		qrSolver_ISAT = 1;		
+	else if (qrFactorization == "NoPivoting")
+		qrSolver_ISAT = 2;
 }
 
 
 //- ISAT scale factor 
-Eigen::VectorXd scaleFactor_HOM;
-scaleFactor_HOM.setConstant(thermodynamicsMapXML->NumberOfSpecies()+1,1.);
+Eigen::VectorXd scalingFactors_ISAT;
+scalingFactors_ISAT.setConstant(thermodynamicsMapXML->NumberOfSpecies()+1,1.);
 if(isatCheck == true) 
 {
 	const unsigned int NC  = thermodynamicsMapXML->NumberOfSpecies();
 
-	massFractionsTol = epsTol_HOM;
+	massFractionsTol = epsilon_ISAT;
 	
-	dictionary scaleFact(solverOptions.subDict("ISAT").subDict("ScaleFactor"));
+	dictionary scalingFactors(solverOptions.subDict("ISAT").subDict("scalingFactors"));
 	for(unsigned int i=0;i<NC;i++) 
 	{	
-		if(scaleFact.found(thermodynamicsMapXML->NamesOfSpecies()[i])) 
-			scaleFactor_HOM(i) = 1./readScalar(scaleFact.lookup(thermodynamicsMapXML->NamesOfSpecies()[i]));
+		if(scalingFactors.found(thermodynamicsMapXML->NamesOfSpecies()[i])) 
+			scalingFactors_ISAT(i) = 1./readScalar(scalingFactors.lookup(thermodynamicsMapXML->NamesOfSpecies()[i]));
 		else 
-			scaleFactor_HOM(i) = 1./readScalar(scaleFact.lookup("otherSpecies"));
+			scalingFactors_ISAT(i) = 1./readScalar(scalingFactors.lookup("others"));
 	}
-	scaleFactor_HOM(NC) = 1./readScalar(scaleFact.lookup("T"));
+	scalingFactors_ISAT(NC) = 1./readScalar(scalingFactors.lookup("T"));
 }
 //- ISAT scaling error factors
-Eigen::VectorXd scaleError_HOM;
-scaleError_HOM.setConstant(thermodynamicsMapXML->NumberOfSpecies()+1,1.);
+Eigen::VectorXd scalingErrors_ISAT;
+scalingErrors_ISAT.setConstant(thermodynamicsMapXML->NumberOfSpecies()+1,1.);
 if(isatCheck == true) 
 {
 	const unsigned int NC  = thermodynamicsMapXML->NumberOfSpecies();
 	
-	dictionary scaleErr(solverOptions.subDict("ISAT").subDict("ScalingError"));
+	dictionary scalingErrors(solverOptions.subDict("ISAT").subDict("scalingErrors"));
 	
 	for(unsigned int i=0;i<NC;i++) 
 	{
-		if(scaleErr.found(thermodynamicsMapXML->NamesOfSpecies()[i])) 
-			scaleError_HOM(i) = readScalar(scaleErr.lookup(thermodynamicsMapXML->NamesOfSpecies()[i]));
+		if(scalingErrors.found(thermodynamicsMapXML->NamesOfSpecies()[i])) 
+			scalingErrors_ISAT(i) = readScalar(scalingErrors.lookup(thermodynamicsMapXML->NamesOfSpecies()[i]));
 		else 
-			scaleError_HOM(i) = readScalar(scaleErr.lookup("otherSpecies"));
+			scalingErrors_ISAT(i) = readScalar(scalingErrors.lookup("others"));
 	}
-	scaleError_HOM(NC) = readScalar(scaleErr.lookup("T"));
+	scalingErrors_ISAT(NC) = readScalar(scalingErrors.lookup("T"));
 }
 
 //- ISAT HOM
-ISAT *isat_HOM = new ISAT(scaleError_HOM, epsTol_HOM,thermodynamicsMapXML->NumberOfSpecies()+1);	
+ISAT *isat_HOM = new ISAT(scalingErrors_ISAT, epsilon_ISAT, thermodynamicsMapXML->NumberOfSpecies()+1);	
 
 // - Setting ISAT_HOM param
 isat_HOM->setMaxSizeBT(maxSizeBT);
@@ -94,17 +114,18 @@ if(isatCheck == true)
 	const unsigned int NC  = thermodynamicsMapXML->NumberOfSpecies();
 	
 	Info << endl << "ISAT parameters " << endl;
-	Info << "   homogeneous         : " << epsTol_HOM << endl;
-	Info << "   typeMagGradSolver   : " << typeMapGradSolver << endl; 	
+	Info << "   tolerance           : " << epsilon_ISAT << endl;
+	Info << "   luFactorization     : " << luFactorization << endl; 	
+	Info << "   qrFactorization     : " << qrFactorization << endl; 	
 	
-	Info << "   scaleFactors        : " << endl;
+	Info << "   scalingFactors      : " << endl;
 	for(unsigned int i=0;i<NC;i++)  
 	{
-		if(scaleFactor_HOM(i) != 1.) 
-			Info << "      " << thermodynamicsMapXML->NamesOfSpecies()[i] << "\t       : " << scaleFactor_HOM(i) << endl;
+		if(scalingFactors_ISAT(i) != 1.) 
+			Info << "      " << thermodynamicsMapXML->NamesOfSpecies()[i] << "\t       : " << scalingFactors_ISAT(i) << endl;
 	}
-	Info << "       otherSpecies    : " << readScalar(solverOptions.subDict("ISAT").subDict("ScaleFactor").lookup("otherSpecies")) << endl;
-	Info << "       T               : " << scaleFactor_HOM(NC) << endl;
+	Info << "       others          : " << readScalar(solverOptions.subDict("ISAT").subDict("scalingFactors").lookup("others")) << endl;
+	Info << "       T               : " << scalingFactors_ISAT(NC) << endl;
 
 
 	Info << "   clear if BT full    : " << clearIfFull << endl;
@@ -135,13 +156,13 @@ if(isatCheck == true)
 	Info << "   scaling error       : " << endl;
 	for(unsigned int i=0;i<NC;i++)  
 	{
-		if(scaleError_HOM(i) != 1.) 
-			Info << "      " << thermodynamicsMapXML->NamesOfSpecies()[i] << "\t       : " << scaleError_HOM(i) << endl;
+		if(scalingErrors_ISAT(i) != 1.) 
+			Info << "      " << thermodynamicsMapXML->NamesOfSpecies()[i] << "\t       : " << scalingErrors_ISAT(i) << endl;
 	}
-	Info << "       otherSpecies    : " << readScalar(solverOptions.subDict("ISAT").subDict("ScalingError").lookup("otherSpecies")) << endl;
-	Info << "       T               : " << scaleError_HOM(NC) << endl;
+	Info << "       others          : " << readScalar(solverOptions.subDict("ISAT").subDict("scalingErrors").lookup("others")) << endl;
+	Info << "       T               : " << scalingErrors_ISAT(NC) << endl;
 	
 	Info << endl;
-	Info << "   stats               : " << printStats << endl << endl;
+	Info << "   statistics          : " << printStats << endl << endl;
 }
 
