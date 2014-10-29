@@ -17,7 +17,7 @@ FoamFile
 
 Kinetics
 {
-	folder	   		"kinetics-POLIMI";
+	folder	   		"../kinetics/kinetics-GLOBAL";
 	inertSpecies 		N2;
 }
 
@@ -28,10 +28,10 @@ PhysicalModel
 	energyEquation			on;
 	constPressureBatchReactor 	true;
 
-	massDiffusionInEnergyEquation	on;
-	diffusivityCorrection		"semi-implicit";
+	massDiffusionInEnergyEquation	off;
+	diffusivityCorrection		"none";
 	diffusivityModel		"multi-component";
-	soretEffect			on;
+	soretEffect			off;
 
 	includeDpDt			off;
 
@@ -67,7 +67,7 @@ OdeHomogeneous
 
 Spark
 {
-	spark 		on;
+	spark 		off;
 	position    	(5.95e-3  0.0 1.5e-3);
 	time		0.;
 	temperature 	2205;

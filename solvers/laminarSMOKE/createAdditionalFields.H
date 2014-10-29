@@ -15,6 +15,7 @@ volScalarField rho
 
 #include "compressibleCreatePhi.H"
 
+#if STEADYSTATE != 1
 Info<< "Creating field DpDt\n" << endl;
 volScalarField DpDt
 (
@@ -27,6 +28,7 @@ volScalarField DpDt
 	mesh,
 	dimensionedScalar("DpDt", p.dimensions()/dimTime, 0)
 );
+#endif
 
 // Kinetic energy
 Info<< "Creating field kinetic energy K\n" << endl;

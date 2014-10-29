@@ -7,6 +7,11 @@ PtrList<volScalarField> Dmix(thermodynamicsMapXML->NumberOfSpecies());
 PtrList<volScalarField> CpSpecies(thermodynamicsMapXML->NumberOfSpecies());
 PtrList<volScalarField> FormationRates(outputFormationRatesIndices.size());
 
+#if STEADYSTATE == 1
+PtrList<volScalarField> sourceImplicit(thermodynamicsMapXML->NumberOfSpecies()+1);
+PtrList<volScalarField> sourceExplicit(thermodynamicsMapXML->NumberOfSpecies()+1);
+#endif
+
 // Loop over all the species in the kinetic mechanism
 for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 {
@@ -138,6 +143,85 @@ for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 			);
 		}
 	}
+
+	#if STEADYSTATE == 1
+
+	for (int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
+	{
+		sourceImplicit.set
+		(
+			i,
+			new volScalarField
+			(
+				IOobject
+				(
+					"SI::" + thermodynamicsMapXML->NamesOfSpecies()[i],
+					mesh.time().timeName(),
+					mesh,
+					IOobject::NO_READ,
+					IOobject::AUTO_WRITE
+				),
+				mesh,
+				dimensionedScalar("SI", dimensionSet(1, -3, -1, 0, 0), 0.0)
+			)
+		);
+
+		sourceExplicit.set
+		(
+			i,
+			new volScalarField
+			(
+				IOobject
+				(
+					"SE::" + thermodynamicsMapXML->NamesOfSpecies()[i],
+					mesh.time().timeName(),
+					mesh,
+					IOobject::NO_READ,
+					IOobject::AUTO_WRITE
+				),
+				mesh,
+				dimensionedScalar("SE", dimensionSet(1, -3, -1, 0, 0), 0.0)
+			)
+		);
+	}
+
+	sourceImplicit.set
+	(
+		thermodynamicsMapXML->NumberOfSpecies(),
+		new volScalarField
+		(
+			IOobject
+			(
+				"SI::T",
+				mesh.time().timeName(),
+				mesh,
+				IOobject::NO_READ,
+				IOobject::AUTO_WRITE
+			),
+			mesh,
+			dimensionedScalar("SIT", dimensionSet(1, -1, -3, -1, 0), 0.0)
+		)
+	);
+
+	sourceExplicit.set
+	(
+		thermodynamicsMapXML->NumberOfSpecies(),
+		new volScalarField
+		(
+			IOobject
+			(
+				"SE::T",
+				mesh.time().timeName(),
+				mesh,
+				IOobject::NO_READ,
+				IOobject::AUTO_WRITE
+			),
+			mesh,
+			dimensionedScalar("SET", dimensionSet(1, -1, -3, 0, 0), 0.0)
+		)
+	);
+
+	#endif
 }
  
 

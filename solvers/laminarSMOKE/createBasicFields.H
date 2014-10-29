@@ -44,6 +44,16 @@ volScalarField psi
     dimensionSet(0, -2, 2, 0, 0)
 );
 
+#if STEADYSTATE == 1
+label pRefCell = 0;
+scalar pRefValue = 0.0;
+setRefCell(p, simple.dict(), pRefCell, pRefValue);
+
+dimensionedScalar rhoMax(simple.dict().lookup("rhoMax"));
+dimensionedScalar rhoMin(simple.dict().lookup("rhoMin"));
+#endif
+
+
 //- Reading temperature [K]
 Info<< "Reading field T\n" << endl;
 volScalarField T

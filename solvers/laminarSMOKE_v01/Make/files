@@ -1,3 +1,0 @@
-laminarSMOKE.C
-
-EXE = $(FOAM_USER_APPBIN)/laminarSMOKE_v01

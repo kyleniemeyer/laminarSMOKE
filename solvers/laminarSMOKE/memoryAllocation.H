@@ -6,6 +6,8 @@ OpenSMOKE::OpenSMOKEVectorDouble moleFractions(thermodynamicsMapXML->NumberOfSpe
 //- Memory allocation: gas-phase chemistry
 OpenSMOKE::OpenSMOKEVectorDouble omega(thermodynamicsMapXML->NumberOfSpecies());
 
+#if STEADYSTATE != 1
+
 // Batch reactor homogeneous
 BatchReactorHomogeneousConstantPressure batchReactorHomogeneousConstantPressure(*thermodynamicsMapXML, *kineticsMapXML);
 BatchReactorHomogeneousConstantVolume   batchReactorHomogeneousConstantVolume(*thermodynamicsMapXML, *kineticsMapXML);
@@ -124,8 +126,12 @@ if (odeParameterBatchReactorHomogeneous.type() == OpenSMOKE::ODE_Parameters::ODE
 }
 #endif
 
+#endif
+
+#if STEADYSTATE != 1
 #if OPENSMOKE_USE_ISAT == 1
     #include "memoryAllocation_ISAT.H"
+#endif
 #endif
 
 

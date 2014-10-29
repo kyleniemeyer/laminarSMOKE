@@ -4,6 +4,7 @@ EXE_INC = \
     $(MKL_SUPPORT) \
     $(ISAT_SUPPORT) \
     $(EXTERNAL_ODE_SOLVERS) \
+    -I../laminarSMOKE \
     -I$(OPENSMOKE_LIBRARY_PATH) \
     -I$(BOOST_LIBRARY_PATH)/include \
     -I$(EIGEN_LIBRARY_PATH) \

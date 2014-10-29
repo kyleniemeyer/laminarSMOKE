@@ -29,6 +29,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+// This is not a steady state simulation
+#define STEADYSTATE 0
+
 // OpenSMOKE++ Definitions
 #include "OpenSMOKEpp"
 

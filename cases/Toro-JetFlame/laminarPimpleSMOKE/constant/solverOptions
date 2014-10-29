@@ -1,0 +1,192 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.2.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.3;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      solverOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Kinetics
+{
+	folder	   		"../kinetics/kinetics-GLOBAL";
+	inertSpecies 		N2;
+}
+
+PhysicalModel
+{
+	strangAlgorithm 		"MomentumTransportReaction";
+	homogeneousReactions 		on;
+	energyEquation			on;
+	constPressureBatchReactor 	true;
+
+	massDiffusionInEnergyEquation	off;
+	diffusivityCorrection		"none";
+	diffusivityModel		"multi-component";
+	soretEffect			off;
+
+	includeDpDt			off;
+
+	thermodynamicPressure		101325.;
+}
+
+Radiation
+{
+	radiationModel "none";
+	environmentTemperature 300.;
+}
+
+Output
+{
+	formationRates		off;
+	diffusivities		off;
+}
+
+ThermophoreticEffect
+{
+	thermophoreticEffect 	off;
+	thermophoreticEffectTag "BIN";
+}
+
+OdeHomogeneous
+{
+	odeSolver 	"OpenSMOKE";
+	relTolerance 	1e-7;
+	absTolerance 	1e-12;
+	maximumOrder 	5;
+	fullPivoting 	false;
+}
+
+Spark
+{
+	spark 		on;
+	position    	(5.95e-3  0.0 1.5e-3);
+	time		0.;
+	temperature 	2205;
+	duration 	0.025;
+	diameter 	1.5e-3;
+}
+
+ISAT 
+{
+	// Basic parameters
+ 	ISAT		 			off;		// ISAT on/off
+	tolerance 				1e-4;		// ISAT tolerance [default: 1e-4]
+	numberSubSteps				1;		// ISAT number of substeps for calculating gradient mapping [default: 1]
+
+	// Lists of useful leaves
+	searchMRU				on;		// search for MRU (Most Recently Used) leaves [default: on]
+	searchMFU				on;		// search for MFU (Most Frequently Used) leaves [default: on]
+	maxSizeMRU 				100;		// max size of MRU (Most Recently Used) [default: 100]
+	maxSizeMFU 				100; 		// max size of MFU (Most Frequently Used) [default: 100]
+	maxSearchMRU 				10;		// max numbers of leaves to be tested (MRU) [default: 10]
+	maxSearchMFU 				30;		// max numbers of leaves to be tested (MFU) [default: 30]
+
+	// What to do when the tre is full?
+	maxSizeBT 				100000;		// max size of binary tree [default: 100000]
+	clearingIfFull 				off;             // if on the tree is cleared when full [default: off]
+		
+	// Balancing coefficients
+	maxTimeOldCoeff 			0.7;		// ? [default: 0.7]
+	maxGrowCoeff 				0.5;		// ? [default: 0.5]
+	maxUsedCoeff 				20.;		// ? [default: 20.]
+	maxHeightCoeff 				20.;		// ? [default: 20.]
+	
+	// Output data
+	statistics				on;		// print statistics on file (useful for parallel calculations) [default: off]
+
+	// Factorizations
+	luFactorization				"Partial";	// LU factorization of dense matrices (Partial || Full) [default: Partial]
+	qrFactorization				"Full";		// QR factorization of dense matrices (NoPivoting || Partial || Full) [default: Full]
+
+	// Scaling factors
+	scalingFactors
+	{
+		T 	1.e3;
+		H	1.e-3;
+		H2	1.e-2;
+		H2O	1.e0;
+		H2O2	1.e-4;
+		HO2	1.e-4;
+		N2	1.e0;
+		O	1.e-3;
+		O2	1.e0;
+		OH	1.e-2;
+		others 	1.;		
+	}
+
+	// Absoute weights to scale the errors
+	scalingErrors
+	{
+		T 	1.;
+		others	1.;		
+	}
+}
+
+LewisNumbers
+{
+	N2 0.987;
+	O2 1.045;
+	H2 0.290;
+	H2O 0.777;
+	H2O2 1.058;
+	CO 1.058;
+	CO2 1.347;
+	CH2O 1.209;
+	CH4 0.955;
+	CH3OH 1.237;
+	C2H2 1.246;
+	CH2CO 1.430;
+	C2H4 1.258;
+	CH3CHO 1.443;
+	C2H6 1.383;
+	C3H6 1.453;
+	O 0.679;
+	H 0.174;
+	OH 0.692;
+	HO2 1.051;
+	CH 0.634;		
+	HCO 1.199;
+	CH2S 0.928;
+	CH3 0.950;
+	CH2OH 1.237;
+	CH3O 1.237;
+	HCCO 0.843;
+	C2H3 1.259;
+	CH3CO 1.437;
+	CH2CHO 1.437;
+	C2H5 1.371;
+	CH2CHCH2 1.479;
+	NC3H7 1.724;
+	C2H 1.233;
+	C4H3 1.969;
+	CYC5H5 2.082;
+	C6H5 2.175;
+	C6H5O 2.358;
+	C6H4C2H 2.535;
+	C10H7 2.903;
+	C3H2 1.364;
+	AC3H4 1.653;
+	PC3H4 1.653;
+	C2H3CHO 1.572;
+	C4H2 1.961;
+	C4H4 1.975;
+	CYC5H6 2.087;
+	C6H6 2.179;
+	C6H5OH 2.361;
+	MCPTD 2.145;
+	C6H5C2H 2.533;
+	C10H8 2.906;
+	CH2 0.928;
+	C3H3 1.644;
+}
+
+// ************************************************************************* //

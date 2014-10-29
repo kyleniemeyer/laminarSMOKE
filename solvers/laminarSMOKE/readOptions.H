@@ -231,6 +231,8 @@ const dictionary& thermophoreticEffectDictionary = solverOptions.subDict("Thermo
 
 /*********************************************************************************************************************/ 
 
+#if STEADYSTATE != 1
+
 // Batch reactor homogeneous: ode parameters
 const dictionary& odeHomogeneousDictionary = solverOptions.subDict("OdeHomogeneous");
 OpenSMOKE::ODE_Parameters odeParameterBatchReactorHomogeneous;
@@ -333,9 +335,12 @@ OpenSMOKE::ODE_Parameters odeParameterBatchReactorHomogeneous;
 		#endif
 	}			
 }
+#endif
 
+#if STEADYSTATE != 1
 #if OPENSMOKE_USE_ISAT == 1
     #include "readOptions_ISAT.H"
+#endif
 #endif
 
 Info<< "Solver options correctly read\n" << endl;
