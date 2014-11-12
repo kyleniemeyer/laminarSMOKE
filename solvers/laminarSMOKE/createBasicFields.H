@@ -51,6 +51,22 @@ setRefCell(p, simple.dict(), pRefCell, pRefValue);
 
 dimensionedScalar rhoMax(simple.dict().lookup("rhoMax"));
 dimensionedScalar rhoMin(simple.dict().lookup("rhoMin"));
+
+//- Reading pressure [Pa]
+volScalarField DpDt
+(
+    IOobject
+    (
+        "DpDt",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("DpDt", dimensionSet(1, -1, -3, 0, 0), 0.0)
+);
+
 #endif
 
 
@@ -168,47 +184,15 @@ volScalarField Q
 (
     IOobject
     (
-        "thermo::Q",
+        "gas::Q",
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
         IOobject::AUTO_WRITE
     ),
     mesh,
-    dimensionedScalar("thermo::Q", dimensionSet(1, -1, -3, 0, 0), 0.0)
+    dimensionedScalar("gas::Q", dimensionSet(1, -1, -3, 0, 0), 0.0)
 ); 
-
-
- 
-Info<< "Creating VT\n" << endl;
-volVectorField VT
-(
-    IOobject
-    (
-        "VT",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedVector("thermo::VT", dimensionSet(0, 1, -1, 0, 0), Foam::vector(0., 0., 0.) )
-);
-
-Info<< "Creating rhoVT\n" << endl;
-volVectorField rhoVT
-(
-    IOobject
-    (
-        "rhoVT",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedVector("thermo::rhoVT", dimensionSet(1, -2, -1, 0, 0), Foam::vector(0., 0., 0.) )
-);
 
 //- Allocating memory for mean specific heat [J/kg/K]
 Info<< "Creating field Cp\n" << endl;
@@ -216,7 +200,7 @@ volScalarField cp
 (
     IOobject
     (
-        "thermo::Cp",
+        "gas::Cp",
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
@@ -232,7 +216,7 @@ volScalarField cv
 (
     IOobject
     (
-        "thermo::Cv",
+        "gas::Cv",
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
@@ -248,7 +232,7 @@ volScalarField h
 (
     IOobject
     (
-        "h",
+        "gas::h",
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
@@ -258,28 +242,12 @@ volScalarField h
     dimensionSet(0, 2, -2, 0, 0)
 );
 
-Info<< "Creating sumCorrections\n" << endl;
-volScalarField sumDiffusionCorrections
-(
-	IOobject
-	(
-		"thermo::sumCorrections",
-		runTime.timeName(),
-		mesh,
-		IOobject::NO_READ,
-		IOobject::NO_WRITE
-	),
-	mesh,
-	dimensionSet(1, -3, -1, 0, 0)
-);
-sumDiffusionCorrections = dimensionedScalar("zero", dimensionSet(1, -3, -1, 0, 0), 0.);
-
-Info<< "Creating sumCpSpecies\n" << endl;
-volScalarField sumCpSpecies
+Info<< "Creating massDiffusionInEnergyEquation\n" << endl;
+volScalarField massDiffusionInEnergyEquation
 (
     IOobject
     (
-		"thermo::sumCp",
+		"gas::massDiffusionInEnergyEquation",
 		runTime.timeName(),
 		mesh,
 		IOobject::NO_READ,
@@ -288,4 +256,4 @@ volScalarField sumCpSpecies
     mesh,
     dimensionSet(1, -1, -3, 0, 0)
 );
-sumCpSpecies = dimensionedScalar("zero", dimensionSet(1, -1, -3, 0, 0), 0.);
+massDiffusionInEnergyEquation = dimensionedScalar("zero", dimensionSet(1, -1, -3, 0, 0), 0.);

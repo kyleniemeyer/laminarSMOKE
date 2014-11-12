@@ -123,4 +123,9 @@
     Info<< "rho max/min : "
         << max(rho).value() << " "
         << min(rho).value() << endl;
+
+    if (includeDpDt == true)
+    {
+	DpDt = fvc::div(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+    }
 }

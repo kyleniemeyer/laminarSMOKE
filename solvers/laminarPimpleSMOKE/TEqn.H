@@ -1,18 +1,12 @@
 {
     if(energyEquation == true)
     {
-		sumCpSpecies *= 0.;
+		massDiffusionInEnergyEquation *= 0.;
 		if (iMassDiffusionInEnergyEquation == true)
 		{
-
 			for (label i=0; i<Y.size(); i++)
-			{
-				volScalarField& Yi 	= Y[i];			
-				volScalarField& Dmixi 	= Dmix[i];
-				volScalarField& Cpi 	= CpSpecies[i];
-		
-				sumCpSpecies += rho*Cpi*Dmixi*(fvc::grad(Yi)&fvc::grad(T));
-			}
+				massDiffusionInEnergyEquation -= fvc::div(J[i],HSpecies[i], "div(Ji,hsi)") - 
+								 HSpecies[i] * fvc::div(J[i]);
 		}
 
 		if (radiativeHeatTransfer.radiationModel() == RADIATION_NONE)
@@ -23,7 +17,8 @@
 				+ cp*fvm::div(phi, T)		    
 				 ==
 		    		fvm::laplacian(lambda,T) + 
-		   	 	sumCpSpecies + DpDt +
+		   	 	massDiffusionInEnergyEquation + 
+				DpDt +
 		    		cp*fvOptions(rho, T)
 			);
 
@@ -40,7 +35,9 @@
 				+ cp*fvm::div(phi, T)		    
 				 ==
 		    		fvm::laplacian(lambda,T) + 
-		   	 	sumCpSpecies + DpDt - Qrad +
+		   	 	massDiffusionInEnergyEquation +
+				DpDt - 
+				Qrad +
 		    		cp*fvOptions(rho, T)
 			);
 

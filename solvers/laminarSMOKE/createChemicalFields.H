@@ -4,7 +4,7 @@ Info<< " * Reading chemical species mole fractions or mass fractions..." << endl
 
 PtrList<volScalarField> Y(thermodynamicsMapXML->NumberOfSpecies());
 PtrList<volScalarField> Dmix(thermodynamicsMapXML->NumberOfSpecies());
-PtrList<volScalarField> CpSpecies(thermodynamicsMapXML->NumberOfSpecies());
+PtrList<volScalarField> HSpecies(thermodynamicsMapXML->NumberOfSpecies());
 PtrList<volScalarField> FormationRates(outputFormationRatesIndices.size());
 
 #if STEADYSTATE == 1
@@ -45,21 +45,21 @@ for(int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 			)
 		);
 
-		CpSpecies.set
+		HSpecies.set
 		(
 			i,
 			new volScalarField
 			(
 				IOobject
 				(
-				"thermo::Cp_"+ thermodynamicsMapXML->NamesOfSpecies()[i],
+				"thermo::H_"+ thermodynamicsMapXML->NamesOfSpecies()[i],
 				mesh.time().timeName(),
 				mesh,
 				IOobject::NO_READ,
 				IOobject::NO_WRITE
 				),
 				mesh,
-				dimensionSet(0, 2, -2, -1, 0)
+				dimensionSet(0, 2, -2, 0, 0)
 			)
 		);
 	}
@@ -256,3 +256,5 @@ if (soretEffect == true)
 		);
 	}
 }
+
+#include "createFluxes.H"

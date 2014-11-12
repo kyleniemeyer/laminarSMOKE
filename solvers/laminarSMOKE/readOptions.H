@@ -50,7 +50,6 @@ const dictionary& kineticsDictionary = solverOptions.subDict("Kinetics");
 scalar massFractionsTol = 1e-10;
 
 //- Internal models
-enum { DIFFUSIVITY_CORRECTION_NONE, DIFFUSIVITY_CORRECTION_SEMI_IMPLICIT, DIFFUSIVITY_CORRECTION_EXPLICIT} diffusivityCorrection;
 enum { STRANG_MOMENTUM_TRANSPORT_REACTION, STRANG_MOMENTUM_REACTION_TRANSPORT} strangAlgorithm;
 enum { DIFFUSIVITY_MODEL_MULTICOMPONENT, DIFFUSIVITY_MODEL_LEWIS_NUMBERS} diffusivityModel;
 
@@ -82,19 +81,6 @@ const dictionary& physicalModelDictionary = solverOptions.subDict("PhysicalModel
 		soretEffectList[i] = false;	
 	for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
 		indexSoret[i] = -1;
-
-	// Diffusivity 
-	{
-		word diffusivity(physicalModelDictionary.lookup("diffusivityCorrection"));
-		if (diffusivity == "none")					diffusivityCorrection = DIFFUSIVITY_CORRECTION_NONE;
-		else if (diffusivity == "semi-implicit")	diffusivityCorrection = DIFFUSIVITY_CORRECTION_SEMI_IMPLICIT;
-		else if (diffusivity == "explicit")			diffusivityCorrection = DIFFUSIVITY_CORRECTION_EXPLICIT;
-		else
-		{
-			Info << "Wrong diffusivityCorrection option: none || semi-implicit || explicit" << endl;
-			abort();
-		}
-	}
 	
 	// Algorithm
 	{

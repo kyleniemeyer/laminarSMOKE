@@ -1,7 +1,7 @@
 {
 	Info<< "Properties evaluation..." << endl;
 
-	OpenSMOKE::OpenSMOKEVectorDouble CpVector(thermodynamicsMapXML->NumberOfSpecies());
+	OpenSMOKE::OpenSMOKEVectorDouble HVector(thermodynamicsMapXML->NumberOfSpecies());
 	OpenSMOKE::OpenSMOKEVectorDouble Dmixvector(thermodynamicsMapXML->NumberOfSpecies());
 	OpenSMOKE::OpenSMOKEVectorDouble tetamixvector(thermodynamicsMapXML->NumberOfSpecies());
 
@@ -54,9 +54,9 @@
 			
 				if (iMassDiffusionInEnergyEquation == true)
 				{
-					thermodynamicsMapXML->cpMolar_Species(CpVector);
+					thermodynamicsMapXML->hMolar_Species(HVector);
 					for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
-						CpSpecies[i].internalField()[celli] = CpVector[i+1] / thermodynamicsMapXML->MW()[i+1];
+						HSpecies[i].internalField()[celli] = HVector[i+1] / thermodynamicsMapXML->MW()[i+1];
 				}
 			}
 			
@@ -142,9 +142,9 @@
 			
 				if (iMassDiffusionInEnergyEquation == true)
 				{
-					thermodynamicsMapXML->cpMolar_Species(CpVector);
+					thermodynamicsMapXML->hMolar_Species(HVector);
 					for(unsigned int i=0;i<thermodynamicsMapXML->NumberOfSpecies();i++)
-						CpSpecies[i].boundaryField()[patchi][facei] = CpVector[i+1] / thermodynamicsMapXML->MW()[i+1];
+						HSpecies[i].boundaryField()[patchi][facei] = HVector[i+1] / thermodynamicsMapXML->MW()[i+1];
 				}
 			} 
 			

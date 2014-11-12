@@ -1,4 +1,7 @@
+// Mass Fluxes
+#include "fluxes.H"
 
+// Discretization schemes
 tmp<fv::convectionScheme<scalar> > mvConvection
 (
     fv::convectionScheme<scalar>::New
@@ -10,14 +13,6 @@ tmp<fv::convectionScheme<scalar> > mvConvection
     )
 );
 
-if (thermophoreticEffect == true)
-{
-	Info << "Calculating thermophoretic effect... " << endl;
-	rhoVT = -0.55*mu*fvc::grad(T)/T;
-	VT = rhoVT/rho;
-}
-word thermophoreticDivScheme("div(rhoVT,Yi)");
-word soretDivScheme("soretEffect");
 
 {
     double tStart = OpenSMOKE::OpenSMOKEGetCpuTime();
@@ -28,172 +23,52 @@ word soretDivScheme("soretEffect");
     {
         if (i != inertIndex)
         {
-            volScalarField& Yi = Y[i];
+           	volScalarField& Yi = Y[i];
 	    	volScalarField& Dmixi = Dmix[i];
 
-	    	if (diffusivityCorrection != DIFFUSIVITY_CORRECTION_NONE)
-			{
-				dimensionedScalar Mi( "Mi", dimensionSet(1,0,0,0,-1,0,0), thermodynamicsMapXML->MW()[i+1] ); 
+		// Basic equations
+		fvScalarMatrix YiEqn
+		(
+		     fvm::ddt(rho, Yi)
+		   + mvConvection->fvmDiv(phi, Yi)
+		   - fvm::laplacian(rho*Dmixi, Yi)
+		     ==
+                   - fvm::div(Jc,Yi, "div(Jc,Yi)") + 						
+		     fvOptions(rho, Yi)
+		);
 
-				sumDiffusionCorrections *= 0.;
-				for (label j=0; j<Y.size(); j++)
-				{
-					volScalarField& Yj = Y[j];	
-					dimensionedScalar Mj( "Mj", dimensionSet(1,0,0,0,-1,0,0), thermodynamicsMapXML->MW()[j+1] );
-					sumDiffusionCorrections += fvc::laplacian(rho*MWmix/Mj*Dmixi*Yi, Yj);
-				
-					if ( (i==j) && (diffusivityCorrection == DIFFUSIVITY_CORRECTION_SEMI_IMPLICIT) )
-						sumDiffusionCorrections -= fvc::laplacian(rho*MWmix/Mj*Dmixi*Yi, Yj);
-				}
+		// Add Soret effect
+		if (soretEffect == true)
+		{ 
+			if (soretEffectList[i] == true)
+				YiEqn -= fvc::laplacian(rho*Dsoret[indexSoret[i]]/T, T, "laplacian(teta,Yi)");
+		}
 
-				if (diffusivityCorrection == DIFFUSIVITY_CORRECTION_SEMI_IMPLICIT)
-				{
-					if (thermophoreticEffectList[i] == true)
-					{
-						fvScalarMatrix YiEqn
-						(
-							fvm::ddt(rho, Yi)
-						  + mvConvection->fvmDiv(phi, Yi)
-						  - fvm::laplacian(rho*Dmixi, Yi)
-						  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
-						  + sumDiffusionCorrections
-						  + fvc::div(rhoVT*Yi,thermophoreticDivScheme)
-						 ==
-							fvOptions(rho, Yi)
-						);
+		// Add thermophoretic effect
+		if (thermophoreticEffect == true)
+		{
+			if (thermophoreticEffectList[i] == true)
+				YiEqn -= fvc::laplacian(0.55*mu/T*Yi, T, "laplacian(teta,Yi)");
+		}
 
-						YiEqn.relax();
-						fvOptions.constrain(YiEqn);
-						YiEqn.solve(mesh.solver("Yi"));
-						fvOptions.correct(Yi);
-					}
-					else 
-					{
-						if (soretEffectList[i] == true)
-						{
-							fvScalarMatrix YiEqn
-							(
-								fvm::ddt(rho, Yi)
-							  + mvConvection->fvmDiv(phi, Yi)
-							  - fvm::laplacian(rho*Dmixi, Yi)
-							  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
-							  + sumDiffusionCorrections
-							  + fvc::div(rho*Dsoret[indexSoret[i]]/T*fvc::grad(T),soretDivScheme)
-							 ==
-								fvOptions(rho, Yi)
-							);
-
-							YiEqn.relax();
-							fvOptions.constrain(YiEqn);
-							YiEqn.solve(mesh.solver("Yi"));
-							fvOptions.correct(Yi);
-						}
-						else
-						{
-							fvScalarMatrix YiEqn
-							(
-								fvm::ddt(rho, Yi)
-							  + mvConvection->fvmDiv(phi, Yi)
-							  - fvm::laplacian(rho*Dmixi, Yi)
-							  + fvm::laplacian(rho*Dmixi*MWmix*Yi/Mi, Yi)
-							  + sumDiffusionCorrections
-							 ==
-								fvOptions(rho, Yi)
-							);
-
-							YiEqn.relax();
-							fvOptions.constrain(YiEqn);
-							YiEqn.solve(mesh.solver("Yi"));
-							fvOptions.correct(Yi);
-						}				
-					}						
-				}
-				else if (diffusivityCorrection == DIFFUSIVITY_CORRECTION_EXPLICIT)
-				{		
-					if (thermophoreticEffectList[i] == true)
-					{			
-						fvScalarMatrix YiEqn
-						(
-							fvm::ddt(rho, Yi)
-						  + mvConvection->fvmDiv(phi, Yi)
-						  - fvm::laplacian(rho*Dmixi, Yi)
-						  + sumDiffusionCorrections
-						  + fvc::div(rhoVT*Yi,thermophoreticDivScheme)
-						 ==
-							fvOptions(rho, Yi)
-						);
-
-						YiEqn.relax();
-						fvOptions.constrain(YiEqn);
-						YiEqn.solve(mesh.solver("Yi"));
-						fvOptions.correct(Yi);			
-					}
-					else
-					{			
-						fvScalarMatrix YiEqn
-						(
-							fvm::ddt(rho, Yi)
-						  + mvConvection->fvmDiv(phi, Yi)
-						  - fvm::laplacian(rho*Dmixi, Yi)
-						  + sumDiffusionCorrections
-						 ==
-							fvOptions(rho, Yi)
-						);
-
-						YiEqn.relax();
-						fvOptions.constrain(YiEqn);
-						YiEqn.solve(mesh.solver("Yi"));
-						fvOptions.correct(Yi);			
-					}
-				}
-			}
-			else
-			{
-				if (thermophoreticEffectList[i] == true)
-				{
-					fvScalarMatrix YiEqn
-					(
-						fvm::ddt(rho, Yi)
-					  + mvConvection->fvmDiv(phi, Yi)
-					  - fvm::laplacian(rho*Dmixi, Yi)
-					  + fvc::div(rhoVT*Yi,thermophoreticDivScheme)
-					 ==
-						fvOptions(rho, Yi)
-					);
-
-					YiEqn.relax();
-					fvOptions.constrain(YiEqn);
-					YiEqn.solve(mesh.solver("Yi"));
-					fvOptions.correct(Yi);	
-				}
-				else
-				{
-					fvScalarMatrix YiEqn
-					(
-						fvm::ddt(rho, Yi)
-					  + mvConvection->fvmDiv(phi, Yi)
-					  - fvm::laplacian(rho*Dmixi, Yi)
-					 ==
-						fvOptions(rho, Yi)
-					);
-
-					YiEqn.relax();
-					fvOptions.constrain(YiEqn);
-					YiEqn.solve(mesh.solver("Yi"));
-					fvOptions.correct(Yi);	
-				}
-			}
-
-            Yi.max(0.0);
-            Yt += Yi;
+		// Solve
+		YiEqn.relax();
+		fvOptions.constrain(YiEqn);
+		YiEqn.solve(mesh.solver("Yi"));
+		fvOptions.correct(Yi);	
+			
+		// Sum of mass fractions
+            	Yi.max(0.0);
+           	Yt += Yi;
         }
     }
 
-	Info << "Inert species is " << Y[inertIndex].name() << " with local index equal to " << inertIndex << endl;
+    Info << "Inert species is " << Y[inertIndex].name() << " with local index equal to " << inertIndex << endl;
     Y[inertIndex] = scalar(1.0) - Yt;
     Y[inertIndex].max(0.0);
 
-	double tEnd = OpenSMOKE::OpenSMOKEGetCpuTime();
+    double tEnd = OpenSMOKE::OpenSMOKEGetCpuTime();
 	
-	Info << "Transport equations of species solved in " << tEnd - tStart << " s " << endl;
+    Info << "Transport equations of species solved in " << tEnd - tStart << " s " << endl;
 }
+

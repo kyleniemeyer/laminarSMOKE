@@ -101,9 +101,7 @@ U.correctBoundaryConditions();
 fvOptions.correct(U);
 K = 0.5*magSqr(U);
 
-// TOCHECK
 if (includeDpDt == true)
 {
-    //dpdt = fvc::ddt(p);
     DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 }
