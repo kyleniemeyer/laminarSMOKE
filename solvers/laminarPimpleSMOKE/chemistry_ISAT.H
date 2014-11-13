@@ -126,7 +126,7 @@
 												luSolver_ISAT, (tf-t0), numberSubSteps_ISAT, &odeSolverConstantPressure);
 							
 									// add a new leaf 
-									bool flag = isat_HOM->add(phiISAT_HOM, RphiISAT_HOM, mapGrad_HOM, qrSolver_ISAT, phi0base); 
+									bool flag = isat_HOM->add(phiISAT_HOM, RphiISAT_HOM, mapGrad_HOM, phi0base); 
 						
 									if(flag == false)	
 										Info << "ISAT Error - Addition process failed..." << endl;
@@ -222,12 +222,6 @@
 
 			if(isatCheck == true) 
 			{
-				// stats
-				counterISATHOM += counter;
-				if(printStats == true)	
-					fprintf(fleHOM,"%d\t%e\t%d\t%d\t%d\n",counterISATHOM,runTime.value(),isat_HOM->nAdd(),isat_HOM->nGrow(),isat_HOM->nUse());
-
-				// stats
 				Info << endl;
 				Info << " ********* ISAT HOM stats **********" << endl;
 				

@@ -30,7 +30,7 @@ void normalizeMassFractions(Eigen::VectorXd& omega_plus_temperature, const label
 
 void normalizeMassFractions(OpenSMOKE::OpenSMOKEVectorDouble& omega_plus_temperature, const label celli, const double massFractionsTol)
 {
-	double sumFractions = 0.;
+    double sumFractions = 0.;
     for(int i=1; i <= omega_plus_temperature.Size()-1; i++)
             sumFractions += omega_plus_temperature[i];
 
